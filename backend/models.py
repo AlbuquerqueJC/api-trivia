@@ -1,11 +1,5 @@
-import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
-import json
-
-database_name = "trivia"
-database_user = "jca"
-database_path = "postgres://{}:{}@{}/{}".format(database_user, database_user, 'localhost:5432', database_name)
 
 db = SQLAlchemy()
 
@@ -15,7 +9,7 @@ setup_db(app)
 '''
 
 
-def setup_db(app, database_path=database_path):
+def setup_db(app, database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
@@ -57,10 +51,10 @@ class Question(db.Model):
 
     def format(self):
         return {
-            'id'        : self.id,
-            'question'  : self.question,
-            'answer'    : self.answer,
-            'category'  : self.category,
+            'id': self.id,
+            'question': self.question,
+            'answer': self.answer,
+            'category': self.category,
             'difficulty': self.difficulty
         }
 
@@ -82,6 +76,6 @@ class Category(db.Model):
 
     def format(self):
         return {
-            'id'  : self.id,
+            'id': self.id,
             'type': self.type
         }

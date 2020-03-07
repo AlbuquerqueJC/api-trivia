@@ -1,8 +1,8 @@
-import os
+import random
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import random
+
 
 from models import db, setup_db, Question, Category
 
@@ -11,7 +11,7 @@ QUESTIONS_PER_PAGE = 10
 
 # Paginated Questions
 def paginated_questions(request, selection):
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
 
@@ -23,26 +23,30 @@ def paginated_questions(request, selection):
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=False)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile("config.py", silent=True)
 
-    setup_db(app)
+    setup_db(app, app.config["DATABASE_PATH"])
 
-    # DONE: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+    # DONE: Set up CORS. Allow '*' for origins.
+    # Delete the sample route after completing the TODOs
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # DONE: Use the after_request decorator to set Access-Control-Allow
     # CORS Headers
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+        response.headers.add("Access-Control-Allow-Headers",
+                             "Content-Type,Authorization,true")
+        response.headers.add("Access-Control-Allow-Methods",
+                             "GET,PUT,POST,DELETE")
         return response
 
-    # DONE: Create an endpoint to handle GET requests for all available categories.
+    # DONE: Create an endpoint to handle GET requests for all
+    # available categories.
     @app.route('/api/categories', methods=['GET'])
     def retrieve_categories():
         try:
@@ -56,8 +60,8 @@ def create_app(test_config=None):
                 category[cats.id] = cats.type
 
             response = {
-                "success"         : True,
-                "categories"      : category,
+                "success": True,
+                "categories": category,
                 "total_categories": total_categories
             }
 
@@ -71,10 +75,10 @@ def create_app(test_config=None):
     # This endpoint should return a list of questions,
     # number of total questions, current category, categories.
     #
-    # TEST: At this point, when you start the application
-    # you should see questions and categories generated,
-    # ten questions per page and pagination at the bottom of the screen for three pages.
-    # Clicking on the page numbers should update the questions.
+    # TEST: At this point, when you start the application you should see
+    # questions and categories generated, ten questions per page and
+    # pagination at the bottom of the screen for three pages. Clicking on the
+    # page numbers should update the questions.
     @app.route('/api/questions', methods=['GET'])
     def retrieve_questions():
         try:
@@ -98,10 +102,10 @@ def create_app(test_config=None):
             current_category = formatted_cats[0]
 
             response = {
-                "success"         : True,
-                "questions"       : current_questions,
-                "total_questions" : total_questions,
-                "categories"      : category,
+                "success": True,
+                "questions": current_questions,
+                "total_questions": total_questions,
+                "categories": category,
                 "current_category": current_category
             }
 
@@ -111,14 +115,16 @@ def create_app(test_config=None):
         except():
             abort(404)
 
-    # DONE: Create an endpoint to DELETE question using a question ID.
-    # TEST: When you click the trash icon next to a question, the question will be removed.
-    # This removal will persist in the database and when you refresh the page.
+    # DONE: Create an endpoint to DELETE question using a question ID. TEST:
+    # When you click the trash icon next to a question, the question will be
+    # removed. This removal will persist in the database and when you refresh
+    # the page.
     @app.route('/api/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         category = request.args.get('category', 1, type=int)
         try:
-            question = Question.query.filter(Question.id == question_id).one_or_none()
+            question = Question.query.filter(Question.id == question_id)\
+                .one_or_none()
 
             if question is None:
                 abort(422)
@@ -132,10 +138,10 @@ def create_app(test_config=None):
             total_questions = len(selection)
 
             response = {
-                "success"         : True,
-                "deleted"         : question_id,
-                "questions"       : current_questions,
-                "total_questions" : total_questions,
+                "success": True,
+                "deleted": question_id,
+                "questions": current_questions,
+                "total_questions": total_questions,
                 "current_category": category
             }
 
@@ -148,9 +154,9 @@ def create_app(test_config=None):
     # which will require the question and answer text,
     # category, and difficulty score.
     #
-    # TEST: When you submit a question on the "Add" tab,
-    # the form will clear and the question will appear at the end of the last page
-    # of the questions list in the "List" tab.
+    # TEST: When you submit a question on the "Add" tab, the form will clear
+    # and the question will appear at the end of the last page of the
+    # questions list in the "List" tab.
     @app.route('/api/questions', methods=['POST', 'PUT'])
     def create_question():
         body = request.get_json()
@@ -177,10 +183,10 @@ def create_app(test_config=None):
             total_questions = len(selection)
 
             response = {
-                "success"         : True,
-                "created"         : question.id,
-                "questions"       : current_questions,
-                "total_questions" : total_questions
+                "success": True,
+                "created": question.id,
+                "questions": current_questions,
+                "total_questions": total_questions
             }
 
             return jsonify(response)
@@ -219,10 +225,10 @@ def create_app(test_config=None):
                     results.append(question.id)
 
         response = {
-            'questions'       : paginated_questions(request, selection),
-            'total_questions' : len(results),
-            'current_category': category,
-            'success'         : True
+            "questions": paginated_questions(request, selection),
+            "total_questions": len(results),
+            "current_category": category,
+            "success": True
         }
 
         return jsonify(response)
@@ -235,19 +241,21 @@ def create_app(test_config=None):
     @app.route('/api/categories/<int:category_id>/questions', methods=['GET'])
     def category_questions(category_id):
         try:
-            selection = Question.query.filter(Question.category == category_id).all()
+            selection = Question.query\
+                .filter(Question.category == category_id).all()
             current_questions = paginated_questions(request, selection)
             total_questions = len(selection)
             if len(current_questions) == 0:
                 abort(404)
 
-            current_category = Category.query.filter(Category.id == category_id)\
+            current_category = Category.query\
+                .filter(Category.id == category_id)\
                 .one_or_none().format()
 
             response = {
-                "success"         : True,
-                "questions"       : current_questions,
-                "total_questions" : total_questions,
+                "success": True,
+                "questions": current_questions,
+                "total_questions": total_questions,
                 "current_category": current_category
             }
             return jsonify(response)
@@ -276,10 +284,12 @@ def create_app(test_config=None):
         try:
             # gather all questions and their ids
             if category["id"] == 0:
-                questions = Question.query.filter(Question.question != '').order_by(Question.id).all()
+                questions = Question.query.filter(Question.question != '')\
+                    .order_by(Question.id).all()
             else:
                 questions = Question.query\
-                    .filter(Question.category == category["id"] and Question.question != '')\
+                    .filter(Question.category == category["id"] and
+                            Question.question != '')\
                     .order_by(Question.id).all()
 
             if len(questions) == 0:
@@ -303,9 +313,9 @@ def create_app(test_config=None):
             # Note the number of questions left
             number_of_asked_questions = len(previous_questions)
 
-            # Randomize the question that comes up everytime you play
-            # if number of asked questions is equal to total questions minus asked questions means
-            # no random choice
+            # Randomize the question that comes up everytime you play if
+            # number of asked questions is equal to total questions minus
+            # asked questions means no random choice
             random_max = (total_questions - number_of_asked_questions) - 1
 
             # else randomize the question. keep it within the range of index.
@@ -325,12 +335,12 @@ def create_app(test_config=None):
                 current_question = questions[random_choice]
 
             response = {
-                "success"           : True,
-                "previousQuestions" : previous_questions,
-                "question"          : current_question,
-                "questions"         : questions,
-                "total_questions"   : total_questions,
-                "current_category"  : category["id"]
+                "success": True,
+                "previousQuestions": previous_questions,
+                "question": current_question,
+                "questions": questions,
+                "total_questions": total_questions,
+                "current_category": category["id"]
             }
             print("Response: ", response)
             return jsonify(response)
@@ -344,7 +354,7 @@ def create_app(test_config=None):
     def not_found(error):
         return jsonify({
             "success": False,
-            "error"  : 404,
+            "error": 404,
             "message": "Not found"
         }), 404
 
@@ -352,7 +362,7 @@ def create_app(test_config=None):
     def method_not_allowed(error):
         return jsonify({
             "success": False,
-            "error"  : 405,
+            "error": 405,
             "message": "Method NOT allowed"
         }), 405
 
@@ -360,7 +370,7 @@ def create_app(test_config=None):
     def unprocessable_entity(error):
         return jsonify({
             "success": False,
-            "error"  : 422,
+            "error": 422,
             "message": "Unprocessable Entity"
         }), 422
 
@@ -368,7 +378,7 @@ def create_app(test_config=None):
     def internal_server_error(error):
         return jsonify({
             "success": False,
-            "error"  : 500,
+            "error": 500,
             "message": "Internal Server Error"
         }), 500
 
