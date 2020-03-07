@@ -12,7 +12,7 @@ DEBUG = True
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Setup Database
-DATABASE_SETUP = {
+database_setup = {
     "database_name_production": "trivia",
     "database_name_test": "trivia_test",
     "user_name": "jca",  # default postgres user name
@@ -22,9 +22,9 @@ DATABASE_SETUP = {
 
 # Construct Database URI
 DATABASE_PATH = "postgres://{}:{}@{}/{}"\
-    .format(DATABASE_SETUP["user_name"],
-            DATABASE_SETUP["password"],
-            DATABASE_SETUP["port"],
-            DATABASE_SETUP["database_name_production"])
+    .format(database_setup["user_name"],
+            database_setup["password"],
+            database_setup["port"],
+            database_setup["database_name_production"])
 
 SQLALCHEMY_DATABASE_URI = DATABASE_PATH

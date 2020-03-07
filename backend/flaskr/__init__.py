@@ -28,6 +28,7 @@ def create_app(test_config=None):
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
+        print(app.config)
 
     setup_db(app, app.config["DATABASE_PATH"])
 
