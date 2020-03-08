@@ -28,9 +28,8 @@ def create_app(test_config=None):
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
-        print(app.config)
 
-    setup_db(app, app.config["DATABASE_PATH"])
+    setup_db(app)
 
     # DONE: Set up CORS. Allow '*' for origins.
     # Delete the sample route after completing the TODOs

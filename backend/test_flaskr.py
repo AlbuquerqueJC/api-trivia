@@ -7,7 +7,6 @@ from models import setup_db, Question, Category
 from flaskr import create_app
 
 
-
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
 
@@ -15,15 +14,18 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        database_name = "trivia_test"
-        database_user = "jca"
-        self.database_path = "postgres://{}:{}@{}/{}".format(database_user, database_user,
-                                                             'localhost:5432', database_name)
-        setup_db(self.app, self.database_path)
+        db_config = self.app.config["DATABASE_SETUP"]
+        self.app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://{}:{}@{}/{}"\
+            .format(db_config["user_name"],
+                    db_config["password"],
+                    db_config["port"],
+                    db_config["database_name_test"])
+        setup_db(self.app)
 
         self.new_question = {
             "category"  : 6,
-            "question"  : "Who is the greatest developer? Hint: the author of this question",
+            "question"  : "Who is the greatest developer? Hint: the author "
+                          "of this question",
             "answer"    : "Joao Albuquerque",
             "difficulty": 1
         }
@@ -39,8 +41,8 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    # Done: Write at least one test for each test for successful operation and for expected errors.
-    # GET Categories
+    # Done: Write at least one test for each test for successful operation
+    # and for expected errors. GET Categories
     def test_retrieve_categories(self):
         res = self.client().get('/api/categories')
         data = json.loads(res.data)
@@ -72,7 +74,8 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/api/categories/6/questions')
         data = json.loads(res.data)
 
-        total_questions = len(Question.query.filter(Question.category == 6).all())
+        total_questions = len(Question.query.filter(Question.category == 6)
+                              .all())
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -153,7 +156,8 @@ class TriviaTestCase(unittest.TestCase):
         )
         added_question.insert()
 
-        res = self.client().delete('/api/questions/{}'.format(added_question.id))
+        res = self.client().delete('/api/questions/{}'.
+                                   format(added_question.id))
         data = json.loads(res.data)
 
         total_questions = len(Question.query.all())
@@ -166,7 +170,8 @@ class TriviaTestCase(unittest.TestCase):
 
     # POST Search Questions - with results
     def test_search_questions_with_results(self):
-        res = self.client().post('/api/questions/search', json={"searchTerm" : "title"})
+        res = self.client().post('/api/questions/search',
+                                 json={"searchTerm": "title"})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -176,7 +181,8 @@ class TriviaTestCase(unittest.TestCase):
 
     # POST Search Questions - no results
     def test_search_questions_without_results(self):
-        res = self.client().post('/api/questions/search', json={"searchTerm" : "zebra"})
+        res = self.client().post('/api/questions/search',
+                                 json={"searchTerm": "zebra"})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -186,7 +192,8 @@ class TriviaTestCase(unittest.TestCase):
 
     # POST Search Questions - blank searchTerm
     def test_search_questions_blank_search_term(self):
-        res = self.client().post('/api/questions/search', json={"searchTerm" : ""})
+        res = self.client().post('/api/questions/search',
+                                 json={"searchTerm": ""})
         data = json.loads(res.data)
 
         total_questions = len(Question.query.all())
@@ -206,8 +213,10 @@ class TriviaTestCase(unittest.TestCase):
 
     # POST Play Quiz - One category
     def test_play_quizz_one_category_empty_previous_questions(self):
-        res = self.client().post('/api/quizzes', json={"quiz_category" : {"id" : 6, "type" : "Sports"},
-                                                       "previous_questions" : []})
+        res = self.client().post('/api/quizzes',
+                                 json={"quiz_category": {"id" : 6,
+                                                         "type" : "Sports"},
+                                       "previous_questions" : []})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -218,8 +227,10 @@ class TriviaTestCase(unittest.TestCase):
 
     # POST Play Quiz - Category out of bounds
     def test_play_quizz_one_category_fake_category_id(self):
-        res = self.client().post('/api/quizzes', json={"quiz_category" : {"id" : 99, "type" : "Fake"},
-                                                       "previous_questions" : []})
+        res = self.client().post('/api/quizzes',
+                                 json={"quiz_category": {"id": 99,
+                                                         "type": "Fake"},
+                                       "previous_questions" : []})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
@@ -228,8 +239,10 @@ class TriviaTestCase(unittest.TestCase):
 
     # POST Play Quiz - with previous questions
     def test_play_quizz_one_category_with_previous_questions(self):
-        res = self.client().post('/api/quizzes', json={"quiz_category" : {"id" : 6, "type" : "Sports"},
-                                                       "previous_questions" : [62]})
+        res = self.client().post('/api/quizzes',
+                                 json={"quiz_category": {"id": 6,
+                                                         "type": "Sports"},
+                                       "previous_questions": [62]})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
